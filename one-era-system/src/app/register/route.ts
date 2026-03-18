@@ -1,51 +1,32 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import sqlite3 from 'sqlite3';
+import { open } from 'sqlite';
 
 export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-    const { type, name, phone, email, agency, company, target, date, time, note } = body;
+  const body = await request.json();
+  
+  // Kết nối tới file database cục bộ (tự tạo nếu chưa có)
+  const db = await open({
+    filename: './one_era_data.db',
+    driver: sqlite3.Database
+  });
 
-    // 1. Kiểm tra dữ liệu đầu vào (Server-side Validation)
-    if (!name || !phone) {
-      return NextResponse.json({ error: 'Thiếu thông tin bắt buộc' }, { status: 400 });
-    }
+  // Tạo bảng nếu chưa tồn tại (chỉ chạy lần đầu)
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS registrations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      type TEXT, name TEXT, phone TEXT, email TEXT, 
+      target TEXT, date TEXT, time TEXT, note TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
 
-    // 2. Chống trùng lặp (Ví dụ: SĐT không được đăng ký cùng 1 ngày 2 lần)
-    const { data: existing } = await supabase
-      .from('registrations')
-      .select('id')
-      .eq('phone', phone)
-      .eq('visit_date', date)
-      .single();
+  // Lưu dữ liệu
+  await db.run(
+    `INSERT INTO registrations (type, name, phone, email, target, date, time, note) 
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [body.type, body.name, body.phone, body.email, body.target, body.date, body.time, body.note]
+  );
 
-    if (existing) {
-      return NextResponse.json({ error: 'Số điện thoại này đã có lịch hẹn trong ngày này' }, { status: 409 });
-    }
-
-    // 3. Lưu vào Database
-    const { data, error } = await supabase
-      .from('registrations')
-      .insert([
-        { 
-          category: type, // visitor, agency, partner
-          full_name: name,
-          phone_number: phone,
-          email: email,
-          organization: agency || company || '', // Tên đại lý hoặc công ty đối tác
-          visit_area: target, // Sa bàn, Nhà mẫu, Immersion Room
-          visit_date: date,
-          visit_time: time,
-          note: note,
-          status: 'pending' // Mặc định là chờ xác nhận
-        }
-      ]);
-
-    if (error) throw error;
-
-    return NextResponse.json({ message: 'Lưu dữ liệu thành công', data }, { status: 200 });
-
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+  return NextResponse.json({ message: "Lưu thành công vào Database nội bộ!" });
 }
