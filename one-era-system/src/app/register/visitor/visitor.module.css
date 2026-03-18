@@ -1,0 +1,145 @@
+.glassContainer {
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(50px);
+  -webkit-backdrop-filter: blur(50px);
+  border: 1px solid rgba(197, 160, 89, 0.4);
+  border-radius: 40px;
+  padding: 3.5rem 4rem;
+  width: 100%;
+  max-width: 950px;
+  margin: 2rem auto;
+}
+
+.title {
+  font-size: 34px;
+  font-weight: 900;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  text-align: center;
+  color: #ffffff;
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.6), 0 0 30px rgba(197, 160, 89, 0.4);
+  margin-bottom: 3.5rem;
+}
+
+.backBtn {
+  font-size: 13px;
+  font-weight: 900;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  text-shadow: 0 0 12px rgba(255, 255, 255, 1);
+}
+
+.label {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffffff; 
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 1rem;
+}
+
+.regInput {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 1.1rem 1.5rem;
+  border-radius: 1.25rem;
+  color: #ffffff;
+  font-size: 1rem;
+  outline: none;
+}
+
+.customSelectWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.customSelectHeader {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(197, 160, 89, 0.6);
+  padding: 1.1rem 1.5rem;
+  border-radius: 1.25rem;
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.dropdownList {
+  position: absolute;
+  top: 115%;
+  left: 0;
+  width: 100%;
+  background: #111111;
+  border: 1px solid rgba(197, 160, 89, 0.4);
+  border-radius: 1.25rem;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.dropdownItem {
+  padding: 1.1rem 1.5rem;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.dropdownItem:hover {
+  background: rgba(197, 160, 89, 0.25);
+  color: #c5a059;
+}
+
+.chip {
+  padding: 1.3rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  text-align: center;
+  cursor: pointer;
+}
+
+.chipActive {
+  background: #c5a059;
+  color: #000;
+  box-shadow: 0 0 35px rgba(197, 160, 89, 0.6);
+  font-weight: 900;
+}
+
+.subSelectionArea {
+  margin-top: 2rem;
+  padding: 2.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 2rem;
+  border: 1px solid rgba(197, 160, 89, 0.2);
+  display: grid;
+  grid-template-columns: 1fr 2fr 2fr;
+  gap: 1.5rem;
+}
+
+.errorText {
+  color: #ff4d4d;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 0.6rem;
+}
+
+.btnSubmit {
+  width: 100%;
+  padding: 1.6rem;
+  background: #c5a059;
+  color: #000;
+  font-weight: 900;
+  font-size: 18px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  border-radius: 100px;
+  margin-top: 3rem;
+}
