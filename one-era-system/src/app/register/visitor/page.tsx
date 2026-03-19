@@ -1,157 +1,126 @@
 'use client'
 import styles from './visitor.module.css';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-function RegistrationForm() {
+function VisitorForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
-  // Lấy ngôn ngữ từ URL (?lang=en hoặc ?lang=vi), mặc định là 'vi'
   const lang = searchParams.get('lang') || 'vi';
 
-  // Dữ liệu đa ngôn ngữ
-  const dict: any = {
+  const timeSlots = ["09:00", "10:30", "13:30", "15:00"];
+
+  // State
+  const [selTime, setSelTime] = useState("");
+  const [showTime, setShowTime] = useState(false);
+
+  // Dictionary chuyển ngữ
+  const dict = {
     vi: {
-      title: "ĐĂNG KÝ THAM QUAN", back: "QUAY LẠI", name: "HỌ VÀ TÊN", cccd: "SỐ CCCD", phone: "SỐ ĐIỆN THOẠI", email: "EMAIL (NẾU CÓ)",
-      area: "KHU VỰC TRƯNG BÀY (MAX 25 KHÁCH)", saban: "SA BÀN", nhamau: "NHÀ MẪU", 
-      special: "TRẢI NGHIỆM ĐẶC BIỆT (MAX 10 KHÁCH)", note: "GHI CHÚ", 
-      guest: "SL KHÁCH", date: "NGÀY CHỌN", time: "GIỜ CHỌN", submit: "GỬI ĐĂNG KÝ",
-      placeholderTime: "-- Chọn khung giờ --", placeholderNote: "Nhập ghi chú thêm...",
-      errName: "Vui lòng nhập họ tên", errCCCD: "Vui lòng nhập CCCD", errPhone: "Vui lòng nhập số điện thoại",
-      errSelect: "Vui lòng chọn ít nhất một khu vực"
+      back: "← QUAY LẠI",
+      title: "ĐĂNG KÝ THAM QUAN",
+      name: "HỌ TÊN KHÁCH",
+      cccd: "CCCD",
+      phone: "SĐT",
+      plus: "SỐ LƯỢNG NGƯỜI ĐI CÙNG",
+      date: "NGÀY",
+      time: "KHUNG GIỜ",
+      submit: "XÁC NHẬN ĐĂNG KÝ",
+      loading: "Đang tải..."
     },
     en: {
-      title: "VISIT REGISTRATION", back: "BACK", name: "FULL NAME", cccd: "ID NUMBER", phone: "PHONE NUMBER", email: "EMAIL (OPTIONAL)",
-      area: "EXHIBITION AREA (MAX 25 GUESTS)", saban: "SALES MODEL", nhamau: "MOCKUP HOUSE",
-      special: "SPECIAL EXPERIENCE (MAX 10 GUESTS)", note: "NOTE",
-      guest: "GUESTS", date: "DATE", time: "TIME", submit: "SUBMIT",
-      placeholderTime: "-- Select time --", placeholderNote: "Enter additional notes...",
-      errName: "Please enter your name", errCCCD: "Please enter ID number", errPhone: "Please enter phone number",
-      errSelect: "Please select at least one area"
+      back: "← BACK",
+      title: "VISITOR REGISTRATION",
+      name: "FULL NAME",
+      cccd: "ID CARD / PASSPORT",
+      phone: "PHONE NUMBER",
+      plus: "NUMBER OF GUESTS",
+      date: "DATE",
+      time: "TIME SLOT",
+      submit: "CONFIRM REGISTRATION",
+      loading: "Loading..."
     }
   };
 
-  const t = dict[lang] || dict.vi;
+  const t = lang === 'en' ? dict.en : dict.vi;
 
-  const [formData, setFormData] = useState({ name: '', cccd: '', phone: '', note: '' });
-  const [errors, setErrors] = useState<any>({});
-  const [activeMain, setActiveMain] = useState<string | null>(null);
-  const [activeImmersion, setActiveImmersion] = useState(false);
+  // Logic Ngày & Giờ
+  const today = new Date().toISOString().split('T')[0];
+  const maxDate = new Date();
+  maxDate.setDate(maxDate.getDate() + 2);
+  const maxDateStr = maxDate.toISOString().split('T')[0];
 
-  const [showMainTime, setShowMainTime] = useState(false);
-  const [selectedMainTime, setSelectedMainTime] = useState(t.placeholderTime);
-  const [showImmeTime, setShowImmeTime] = useState(false);
-  const [selectedImmeTime, setSelectedImmeTime] = useState(t.placeholderTime);
-
-  // Cập nhật lại placeholder khi ngôn ngữ URL thay đổi
   useEffect(() => {
-    setSelectedMainTime(t.placeholderTime);
-    setSelectedImmeTime(t.placeholderTime);
-  }, [lang, t.placeholderTime]);
-
-  const handleValidation = () => {
-    let newErrors: any = {};
-    if (!formData.name) newErrors.name = t.errName;
-    if (!formData.cccd) newErrors.cccd = t.errCCCD;
-    if (!formData.phone) newErrors.phone = t.errPhone;
-    if (!activeMain && !activeImmersion) newErrors.selection = t.errSelect;
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    const now = new Date();
+    const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+    const nextSlot = timeSlots.find(slot => {
+      const [h, m] = slot.split(':').map(Number);
+      return (h * 60 + m) > currentTimeInMinutes;
+    });
+    setSelTime(nextSlot || timeSlots[0]);
+  }, []);
 
   return (
     <div className={styles.glassContainer}>
-      <div className="flex justify-between items-center mb-12">
-        <div onClick={() => router.back()} className={styles.backBtn}>← {t.back}</div>
-        <img src="/images/logo-one-era.png" alt="Logo" className="w-36" />
+      <div className="flex justify-between items-center mb-10">
+        <div onClick={() => router.back()} className={styles.backBtn}>
+          <span>{t.back}</span>
+        </div>
+        <img src="/images/logo-one-era.png" alt="Logo" className="w-32" />
       </div>
 
       <h1 className={styles.title}>{t.title}</h1>
 
-      <form className="space-y-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-          <div>
+      <form className="space-y-6">
+        <div className={styles.formGrid}>
+          <div className="col-span-2">
             <label className={styles.label}>{t.name}</label>
-            <input type="text" className={styles.regInput} onChange={(e) => setFormData({...formData, name: e.target.value})} />
-            {errors.name && <p className={styles.errorText}>{errors.name}</p>}
+            <input type="text" className={styles.regInput} placeholder="..." />
           </div>
           <div>
             <label className={styles.label}>{t.cccd}</label>
-            <input type="text" className={styles.regInput} onChange={(e) => setFormData({...formData, cccd: e.target.value})} />
-            {errors.cccd && <p className={styles.errorText}>{errors.cccd}</p>}
+            <input type="text" className={styles.regInput} placeholder="..." />
           </div>
           <div>
             <label className={styles.label}>{t.phone}</label>
-            <input type="tel" className={styles.regInput} onChange={(e) => setFormData({...formData, phone: e.target.value})} />
-            {errors.phone && <p className={styles.errorText}>{errors.phone}</p>}
+            <input type="tel" className={styles.regInput} placeholder="..." />
+          </div>
+        </div>
+
+        <div className={styles.subSelectionArea}>
+          <div>
+            <label className={styles.label}>{t.plus}</label>
+            <input type="number" defaultValue={0} min={0} max={10} className={styles.regInput} />
           </div>
           <div>
-            <label className={styles.label}>{t.email}</label>
-            <input type="email" className={styles.regInput} />
+            <label className={styles.label}>{t.date}</label>
+            <input type="date" min={today} max={maxDateStr} defaultValue={today} className={styles.regInput} />
+          </div>
+          <div className="relative">
+            <label className={styles.label}>{t.time}</label>
+            <div className={styles.customSelectHeader} onClick={() => setShowTime(!showTime)}>
+              {selTime || "--:--"}
+            </div>
+            {showTime && (
+              <div className={styles.dropdownList}>
+                <div className={styles.scrollArea}>
+                  {timeSlots.map(slot => (
+                    <div key={slot} className={styles.dropdownItem} onClick={() => { setSelTime(slot); setShowTime(false); }}>
+                      {slot}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        <div>
-          <label className={styles.label}>{t.area}</label>
-          <div className="grid grid-cols-2 gap-6 mb-4">
-            <div onClick={() => setActiveMain('sa-ban')} className={`${styles.chip} ${activeMain === 'sa-ban' ? styles.chipActive : ''}`}>{t.saban}</div>
-            <div onClick={() => setActiveMain('nha-mau')} className={`${styles.chip} ${activeMain === 'nha-mau' ? styles.chipActive : ''}`}>{t.nhamau}</div>
-          </div>
-          {activeMain && (
-            <div className={styles.subSelectionArea}>
-              <div><label className={styles.label}>{t.guest}</label><input type="number" defaultValue={1} className={styles.regInput} /></div>
-              <div><label className={styles.label}>{t.date}</label><input type="date" className={styles.regInput} /></div>
-              <div className={styles.customSelectWrapper}>
-                <label className={styles.label}>{t.time}</label>
-                <div className={styles.customSelectHeader} onClick={() => setShowMainTime(!showMainTime)}>{selectedMainTime}</div>
-                {showMainTime && (
-                  <div className={styles.dropdownList}>
-                    {["09:00", "10:30", "13:30", "15:00"].map(s => <div key={s} className={styles.dropdownItem} onClick={() => {setSelectedMainTime(s); setShowMainTime(false)}}>{s}</div>)}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div>
-          <label className={styles.label}>{t.special}</label>
-          <div onClick={() => setActiveImmersion(!activeImmersion)} className={`${styles.chip} ${activeImmersion ? styles.chipActive : ''}`} style={{width: '100%'}}>IMMERSION ROOM</div>
-          {activeImmersion && (
-            <div className={styles.subSelectionArea}>
-              <div><label className={styles.label}>{t.guest}</label><input type="number" defaultValue={1} className={styles.regInput} /></div>
-              <div><label className={styles.label}>{t.date}</label><input type="date" className={styles.regInput} /></div>
-              <div className={styles.customSelectWrapper}>
-                <label className={styles.label}>{t.time}</label>
-                <div className={styles.customSelectHeader} onClick={() => setShowImmeTime(!showImmeTime)}>{selectedImmeTime}</div>
-                {showImmeTime && (
-                  <div className={styles.dropdownList}>
-                    {["09:00", "09:20", "09:40", "10:00"].map(s => <div key={s} className={styles.dropdownItem} onClick={() => {setSelectedImmeTime(s); setShowImmeTime(false)}}>{s}</div>)}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-          {errors.selection && <p className={styles.errorText} style={{textAlign: 'center', marginTop: '1.5rem'}}>{errors.selection}</p>}
-        </div>
-
-        <div>
-          <label className={styles.label}>{t.note}</label>
-          <textarea rows={3} className={styles.regInput} style={{resize: 'none'}} placeholder={t.placeholderNote} />
-        </div>
-
-        <button type="button" onClick={handleValidation} className={styles.btnSubmit}>{t.submit}</button>
+        <button type="button" className={styles.btnSubmit}>{t.submit}</button>
       </form>
     </div>
   );
 }
 
-// Bọc trong Suspense để tránh lỗi "useSearchParams() should be wrapped in a suspense boundary" trong Next.js
-export default function VisitorRegistration() {
-  return (
-    <Suspense fallback={<div className="text-white text-center mt-20">Loading...</div>}>
-      <RegistrationForm />
-    </Suspense>
-  );
+export default function Page() {
+  return <Suspense><VisitorForm /></Suspense>;
 }

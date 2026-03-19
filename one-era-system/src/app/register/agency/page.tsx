@@ -1,166 +1,162 @@
 'use client'
-import styles from '../visitor/visitor.module.css'; // Dùng chung CSS đồng bộ
-import { useState, useEffect, Suspense } from 'react';
+import styles from './agency.module.css';
+import { useState, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-function AgencyRegistrationForm() {
+function AgencyForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const lang = searchParams.get('lang') || 'vi';
 
-  const dict: any = {
-    vi: {
-      title: "ĐĂNG KÝ ĐẠI LÝ", back: "QUAY LẠI", 
-      agencyName: "TÊN ĐẠI LÝ / CÔNG TY", contactName: "NGƯỜI LIÊN HỆ", 
-      phone: "SỐ ĐIỆN THOẠI", email: "EMAIL (NẾU CÓ)",
-      area: "KHU VỰC TRƯNG BÀY (MAX 25 KHÁCH)", saban: "SA BÀN", nhamau: "NHÀ MẪU", 
-      special: "TRẢI NGHIỆM ĐẶC BIỆT (MAX 10 KHÁCH)", note: "GHI CHÚ", 
-      guest: "SL KHÁCH", date: "NGÀY CHỌN", time: "GIỜ CHỌN", submit: "GỬI ĐĂNG KÝ",
-      placeholderTime: "-- Chọn khung giờ --", placeholderNote: "Nhập ghi chú thêm...",
-      errAgency: "Vui lòng nhập tên đại lý", errContact: "Vui lòng nhập người liên hệ", 
-      errPhone: "Vui lòng nhập số điện thoại", errSelect: "Vui lòng chọn ít nhất một khu vực"
-    },
-    en: {
-      title: "AGENCY REGISTRATION", back: "BACK", 
-      agencyName: "AGENCY / COMPANY NAME", contactName: "CONTACT PERSON", 
-      phone: "PHONE NUMBER", email: "EMAIL (OPTIONAL)",
-      area: "EXHIBITION AREA (MAX 25 GUESTS)", saban: "SALES MODEL", nhamau: "MOCKUP HOUSE",
-      special: "SPECIAL EXPERIENCE (MAX 10 GUESTS)", note: "NOTE",
-      guest: "GUESTS", date: "DATE", time: "TIME", submit: "SUBMIT",
-      placeholderTime: "-- Select time --", placeholderNote: "Enter additional notes...",
-      errAgency: "Please enter agency name", errContact: "Please enter contact person", 
-      errPhone: "Please enter phone number", errSelect: "Please select at least one area"
-    }
-  };
+  const agencies = [
+    "THE ONE REAL ESTATE", "REVER", "REALPLUS", "QS LAND", "INDOCHINE", 
+    "ERA VIỆT NAM", "LỘC PHÁT HƯNG & STHOME", "BÁCH NHƯ", "DOUBLE LAND", 
+    "GENIE PROPERTY", "KZEN HOLDINGS", "THẾ GIỚI ĐẤT VIỆT", "VẠN XUÂN SERVICE", 
+    "SGROUP", "KIM OANH REALTY", "KHÁC (VUI LÒNG NHẬP)"
+  ];
 
-  const t = dict[lang] || dict.vi;
+  const timeSlots = ["09:00", "10:30", "13:30", "15:00"];
 
-  const [formData, setFormData] = useState({ agency: '', contact: '', phone: '', email: '', note: '' });
-  const [errors, setErrors] = useState<any>({});
-  const [activeMain, setActiveMain] = useState<string | null>(null);
-  const [activeImmersion, setActiveImmersion] = useState(false);
+  const [selAgency, setSelAgency] = useState("");
+  const [customAgency, setCustomAgency] = useState("");
+  const [showAgency, setShowAgency] = useState(false);
+  const [selTime, setSelTime] = useState("");
+  const [showTime, setShowTime] = useState(false);
 
-  const [showMainTime, setShowMainTime] = useState(false);
-  const [selectedMainTime, setSelectedMainTime] = useState(t.placeholderTime);
-  const [showImmeTime, setShowImmeTime] = useState(false);
-  const [selectedImmeTime, setSelectedImmeTime] = useState(t.placeholderTime);
+  const today = new Date().toISOString().split('T')[0];
+  const maxDate = new Date();
+  maxDate.setDate(maxDate.getDate() + 2);
 
+  // Logic tự động chọn khung giờ gần nhất
   useEffect(() => {
-    setSelectedMainTime(t.placeholderTime);
-    setSelectedImmeTime(t.placeholderTime);
-  }, [lang, t.placeholderTime]);
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinutes = now.getMinutes();
+    const currentTimeInMinutes = currentHour * 60 + currentMinutes;
 
-  const handleValidation = () => {
-    let newErrors: any = {};
-    if (!formData.agency) newErrors.agency = t.errAgency;
-    if (!formData.contact) newErrors.contact = t.errContact;
-    if (!formData.phone) newErrors.phone = t.errPhone;
-    if (!activeMain && !activeImmersion) newErrors.selection = t.errSelect;
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    const nextSlot = timeSlots.find(slot => {
+      const [slotHour, slotMinutes] = slot.split(':').map(Number);
+      return (slotHour * 60 + slotMinutes) > currentTimeInMinutes;
+    });
+
+    // Nếu đã hết giờ trong ngày (sau 15:00), mặc định chọn slot đầu tiên của ngày mai
+    setSelTime(nextSlot || timeSlots[0]);
+  }, []);
 
   return (
     <div className={styles.glassContainer}>
-      <div className="flex justify-between items-center mb-12">
-        <div onClick={() => router.back()} className={styles.backBtn}>← {t.back}</div>
-        <img src="/images/logo-one-era.png" alt="Logo" className="w-36" />
+      <div className="flex justify-between items-center mb-10">
+        <div onClick={() => router.back()} className={styles.backBtn}>
+          <span>← QUAY LẠI</span>
+        </div>
+        <img src="/images/logo-one-era.png" alt="Logo" className="w-32" />
       </div>
 
-      <h1 className={styles.title}>{t.title}</h1>
+      <h1 className={styles.title}>ĐĂNG KÝ TIẾP ĐÓN ĐẠI LÝ</h1>
 
-      <form className="space-y-12">
-        {/* Thông tin định danh Đại lý */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-          <div className="md:col-span-2">
-            <label className={styles.label}>{t.agencyName}</label>
-            <input type="text" className={styles.regInput} onChange={(e) => setFormData({...formData, agency: e.target.value})} />
-            {errors.agency && <p className={styles.errorText}>{errors.agency}</p>}
+      <form className="space-y-6">
+        {/* CHỌN ĐẠI LÝ */}
+        <div className="relative mb-8">
+          <label className={styles.label}>ĐƠN VỊ ĐẠI LÝ</label>
+          <div className={styles.customSelectHeader} onClick={() => setShowAgency(!showAgency)}>
+            <span style={{ color: selAgency ? '#fff' : '#B3ABC4' }}>
+              {selAgency || "-- Chọn Đại lý từ danh sách --"}
+            </span>
+            <span style={{ transition: '0.3s', transform: showAgency ? 'rotate(180deg)' : 'none' }}>▼</span>
           </div>
-          <div>
-            <label className={styles.label}>{t.contactName}</label>
-            <input type="text" className={styles.regInput} onChange={(e) => setFormData({...formData, contact: e.target.value})} />
-            {errors.contact && <p className={styles.errorText}>{errors.contact}</p>}
-          </div>
-          <div>
-            <label className={styles.label}>{t.phone}</label>
-            <input type="tel" className={styles.regInput} onChange={(e) => setFormData({...formData, phone: e.target.value})} />
-            {errors.phone && <p className={styles.errorText}>{errors.phone}</p>}
-          </div>
-          <div className="md:col-span-2">
-            <label className={styles.label}>{t.email}</label>
-            <input type="email" className={styles.regInput} onChange={(e) => setFormData({...formData, email: e.target.value})} />
-          </div>
-        </div>
-
-        {/* Khu vực chọn Sa bàn / Nhà mẫu */}
-        <div>
-          <label className={styles.label}>{t.area}</label>
-          <div className="grid grid-cols-2 gap-6 mb-4">
-            <div onClick={() => setActiveMain('sa-ban')} className={`${styles.chip} ${activeMain === 'sa-ban' ? styles.chipActive : ''}`}>{t.saban}</div>
-            <div onClick={() => setActiveMain('nha-mau')} className={`${styles.chip} ${activeMain === 'nha-mau' ? styles.chipActive : ''}`}>{t.nhamau}</div>
-          </div>
-          {activeMain && (
-            <div className={styles.subSelectionArea}>
-              <div><label className={styles.label}>{t.guest}</label><input type="number" defaultValue={1} className={styles.regInput} /></div>
-              <div><label className={styles.label}>{t.date}</label><input type="date" className={styles.regInput} /></div>
-              <div className={styles.customSelectWrapper}>
-                <label className={styles.label}>{t.time}</label>
-                <div className={styles.customSelectHeader} onClick={() => setShowMainTime(!showMainTime)}>{selectedMainTime}</div>
-                {showMainTime && (
-                  <div className={styles.dropdownList}>
-                    {["09:00", "10:30", "13:30", "15:00"].map(s => <div key={s} className={styles.dropdownItem} onClick={() => {setSelectedMainTime(s); setShowMainTime(false)}}>{s}</div>)}
+          
+          {showAgency && (
+            <div className={styles.dropdownList}>
+              <div className={styles.scrollArea}>
+                {agencies.map(a => (
+                  <div key={a} className={styles.dropdownItem} 
+                    onClick={() => { 
+                      setSelAgency(a); 
+                      setShowAgency(false);
+                      if (a !== "KHÁC (VUI LÒNG NHẬP)") setCustomAgency(""); 
+                    }}>
+                    {a}
                   </div>
-                )}
+                ))}
               </div>
+            </div>
+          )}
+
+          {selAgency === "KHÁC (VUI LÒNG NHẬP)" && (
+            <div className={styles.extraInputContainer}>
+              <input 
+                type="text" 
+                className={styles.regInputExtra} 
+                placeholder="Vui lòng nhập tên đại lý của bạn..."
+                value={customAgency}
+                onChange={(e) => setCustomAgency(e.target.value)}
+                autoFocus
+              />
             </div>
           )}
         </div>
 
-        {/* Khu vực Immersion Room */}
-        <div>
-          <label className={styles.label}>{t.special}</label>
-          <div onClick={() => setActiveImmersion(!activeImmersion)} className={`${styles.chip} ${activeImmersion ? styles.chipActive : ''}`} style={{width: '100%'}}>IMMERSION ROOM</div>
-          {activeImmersion && (
-            <div className={styles.subSelectionArea}>
-              <div><label className={styles.label}>{t.guest}</label><input type="number" defaultValue={1} className={styles.regInput} /></div>
-              <div><label className={styles.label}>{t.date}</label><input type="date" className={styles.regInput} /></div>
-              <div className={styles.customSelectWrapper}>
-                <label className={styles.label}>{t.time}</label>
-                <div className={styles.customSelectHeader} onClick={() => setShowImmeTime(!showImmeTime)}>{selectedImmeTime}</div>
-                {showImmeTime && (
-                  <div className={styles.dropdownList}>
-                    {["09:00", "09:20", "09:40", "10:00"].map(s => <div key={s} className={styles.dropdownItem} onClick={() => {setSelectedImmeTime(s); setShowImmeTime(false)}}>{s}</div>)}
-                  </div>
-                )}
-              </div>
+        {/* THÔNG TIN NGƯỜI ĐĂNG KÝ */}
+        <div className={styles.formGrid}>
+          <div>
+            <label className={styles.label}>HỌ TÊN NGƯỜI ĐĂNG KÝ</label>
+            <input type="text" className={styles.regInput} placeholder="Nhập tên..." />
+          </div>
+          <div>
+            <label className={styles.label}>CCCD NGƯỜI ĐĂNG KÝ</label>
+            <input type="text" className={styles.regInput} placeholder="..." />
+          </div>
+          <div className="col-span-2">
+            <label className={styles.label}>SĐT NGƯỜI ĐĂNG KÝ</label>
+            <input type="tel" className={styles.regInput} placeholder="..." />
+          </div>
+        </div>
+
+        {/* THÔNG TIN KHÁCH HÀNG */}
+        <div className={styles.formGrid}>
+          <div>
+            <label className={styles.label}>TÊN KHÁCH HÀNG</label>
+            <input type="text" className={styles.regInput} placeholder="..." />
+          </div>
+          <div>
+            <label className={styles.label}>4 SỐ CUỐI SĐT KHÁCH HÀNG</label>
+            <input type="text" maxLength={4} className={styles.regInput} placeholder="Ví dụ: 8888" />
+          </div>
+        </div>
+
+        {/* THÔNG SỐ THAM QUAN */}
+        <div className={styles.subSelectionArea}>
+          <div>
+            <label className={styles.label}>SL KHÁCH (MAX 10)</label>
+            <input type="number" defaultValue={1} min={1} max={10} className={styles.regInput} />
+          </div>
+          <div>
+            <label className={styles.label}>NGÀY THAM QUAN</label>
+            <input type="date" min={today} max={maxDate.toISOString().split('T')[0]} defaultValue={today} className={styles.regInput} />
+          </div>
+          <div className="relative">
+            <label className={styles.label}>KHUNG GIỜ</label>
+            <div className={styles.customSelectHeader} onClick={() => setShowTime(!showTime)}>
+              {selTime || "--:--"}
             </div>
-          )}
-          {errors.selection && <p className={styles.errorText} style={{textAlign: 'center', marginTop: '1.5rem'}}>{errors.selection}</p>}
+            {showTime && (
+              <div className={styles.dropdownList}>
+                <div className={styles.scrollArea}>
+                  {timeSlots.map(t => (
+                    <div key={t} className={styles.dropdownItem} onClick={() => { setSelTime(t); setShowTime(false); }}>
+                      {t}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Phần ghi chú thêm cho Đại lý */}
-        <div>
-          <label className={styles.label}>{t.note}</label>
-          <textarea 
-            rows={3} 
-            className={styles.regInput} 
-            style={{resize: 'none'}} 
-            placeholder={t.placeholderNote}
-            onChange={(e) => setFormData({...formData, note: e.target.value})}
-          />
-        </div>
-
-        <button type="button" onClick={handleValidation} className={styles.btnSubmit}>{t.submit}</button>
+        <button type="button" className={styles.btnSubmit}>XÁC NHẬN ĐĂNG KÝ</button>
       </form>
     </div>
   );
 }
 
-export default function AgencyPage() {
-  return (
-    <Suspense fallback={<div className="text-white text-center mt-20">Loading...</div>}>
-      <AgencyRegistrationForm />
-    </Suspense>
-  );
-}
+export default function Page() { return <Suspense><AgencyForm /></Suspense>; }

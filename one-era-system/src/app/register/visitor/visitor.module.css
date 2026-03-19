@@ -1,92 +1,71 @@
 .glassContainer {
-  /* Nền tối hơn một chút để làm nổi bật các thành phần màu Sky Blue */
-  background: rgba(15, 23, 42, 0.8); 
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
-  /* Border sử dụng màu Lavender Grey nhẹ nhàng */
-  border: 1px solid rgba(179, 171, 196, 0.2);
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(50px) saturate(150%);
+  -webkit-backdrop-filter: blur(50px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 40px;
   padding: 3.5rem 4rem;
   width: 100%;
-  max-width: 950px;
+  max-width: 1000px;
   margin: 2rem auto;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.7);
+  animation: fadeIn 0.8s ease-out;
 }
 
 .title {
   font-size: 32px;
   font-weight: 950;
-  letter-spacing: -0.02em; /* Thu hẹp lại một chút để trông hiện đại hơn */
   text-transform: uppercase;
   text-align: center;
-  /* Chuyển sang màu Sky Blue của dự án */
-  color: #5DA9DD;
-  /* Đổ bóng chữ tinh tế hơn */
-  text-shadow: 0 4px 20px rgba(93, 169, 221, 0.3);
+  color: #F79552;
+  text-shadow: 0 4px 25px rgba(247, 149, 82, 0.3);
   margin-bottom: 3.5rem;
 }
 
 .backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-size: 11px;
   font-weight: 800;
-  color: #B3ABC4; /* Màu trung tính */
+  color: #B3ABC4;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.25em;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: 0.4s;
 }
 
 .backBtn:hover {
-  color: #5DA9DD;
-  transform: translateX(-5px);
+  color: #ffffff;
+  text-shadow: 0 0 10px #F79552;
 }
 
 .label {
   display: block;
   font-size: 10px;
   font-weight: 800;
-  color: #B3ABC4; /* Lavender Grey giúp mắt dễ chịu hơn trắng tinh */
+  color: #B3ABC4;
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  margin-bottom: 1rem;
+  margin-bottom: 1.1rem;
 }
 
-.regInput {
+.regInput, .customSelectHeader {
   width: 100%;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(179, 171, 196, 0.2);
-  padding: 1.1rem 1.5rem;
+  padding: 1.2rem 1.6rem;
   border-radius: 1.25rem;
   color: #ffffff;
   font-size: 0.95rem;
   outline: none;
-  transition: all 0.3s ease;
-}
-
-.regInput:focus {
-  border-color: #5DA9DD;
-  background: rgba(93, 169, 221, 0.05);
-  box-shadow: 0 0 0 4px rgba(93, 169, 221, 0.1);
 }
 
 .customSelectHeader {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.05);
-  /* Border nhấn nhá bằng màu Sky Blue */
-  border: 1px solid rgba(93, 169, 221, 0.4);
-  padding: 1.1rem 1.5rem;
-  border-radius: 1.25rem;
-  color: #ffffff;
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.customSelectHeader:hover {
-  border-color: #5DA9DD;
-  background: rgba(255, 255, 255, 0.08);
 }
 
 .dropdownList {
@@ -94,90 +73,49 @@
   top: 115%;
   left: 0;
   width: 100%;
-  background: #1a2332; /* Tông xanh đen sâu */
-  border: 1px solid rgba(93, 169, 221, 0.2);
+  background: rgba(30, 41, 59, 0.98);
+  border: 1px solid rgba(247, 149, 82, 0.3);
   border-radius: 1.25rem;
-  overflow: hidden;
-  z-index: 1000;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  z-index: 100;
 }
 
 .dropdownItem {
-  padding: 1.1rem 1.5rem;
+  padding: 1rem;
   color: #B3ABC4;
   cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
 }
 
 .dropdownItem:hover {
-  background: #5DA9DD;
-  color: #ffffff;
+  background: #F79552;
+  color: white;
 }
 
-.chip {
-  padding: 1.1rem;
-  border-radius: 1.25rem;
-  border: 1px solid rgba(179, 171, 196, 0.15);
-  background: rgba(255, 255, 255, 0.03);
-  color: #B3ABC4;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.chipActive {
-  background: #5DA9DD; /* Chuyển sang màu chủ đạo Xanh */
-  color: #ffffff;
-  border-color: transparent;
-  box-shadow: 0 10px 25px rgba(93, 169, 221, 0.4);
-  font-weight: 900;
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem 2.5rem;
 }
 
 .subSelectionArea {
-  margin-top: 2rem;
-  padding: 2.5rem;
-  background: rgba(93, 169, 221, 0.03); /* Phủ nhẹ màu chủ đạo */
-  border-radius: 2.5rem;
-  border: 1px solid rgba(179, 171, 196, 0.1);
+  margin-top: 2.5rem;
+  padding: 2rem;
+  background: rgba(247, 149, 82, 0.04);
+  border-radius: 2rem;
   display: grid;
-  grid-template-columns: 1fr 2fr 2fr;
+  grid-template-columns: 1fr 1.5fr 1.5fr;
   gap: 1.5rem;
-}
-
-.errorText {
-  color: #F79552; /* Dùng màu Sunset Orange cho thông báo lỗi/chú ý */
-  font-size: 10px;
-  font-weight: 700;
-  margin-top: 0.6rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 .btnSubmit {
   width: 100%;
-  padding: 1.4rem;
-  /* Gradient từ Xanh sang Tím nhạt cho chuyên nghiệp */
-  background: linear-gradient(135deg, #5DA9DD 0%, #4A8DB7 100%);
-  color: #ffffff;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #F79552 0%, #e67e35 100%);
+  color: white;
   font-weight: 900;
-  font-size: 16px;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
   border-radius: 100px;
   margin-top: 3rem;
-  border: none;
   cursor: pointer;
-  transition: all 0.4s ease;
-  box-shadow: 0 15px 30px rgba(93, 169, 221, 0.3);
+  box-shadow: 0 20px 40px rgba(247, 149, 82, 0.3);
 }
 
-.btnSubmit:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 20px 40px rgba(93, 169, 221, 0.5);
-  /* Đổi sang màu Sunset khi hover để tạo điểm nhấn */
-  background: linear-gradient(135deg, #F79552 0%, #e67e35 100%);
-}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
