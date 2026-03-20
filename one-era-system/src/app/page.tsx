@@ -9,11 +9,28 @@ export default function HomeSelectionPage() {
   const [showRole, setShowRole] = useState(false);
   const router = useRouter();
 
+  // Cập nhật lại danh sách vai trò theo yêu cầu mới
   const roleOptions = [
-    { id: "visitor", label: lang === "vi" ? "Khách tham quan / Visitor" : "Visitor" },
-    { id: "partner", label: lang === "vi" ? "Đối tác / Partner" : "Partner" },
-    { id: "agency", label: lang === "vi" ? "Đại lý / Agency" : "Agency" },
+    { 
+      id: "visitor", 
+      label: lang === "vi" ? "Khách tham quan" : "Visitor" 
+    },
+    { 
+      id: "agency", 
+      label: lang === "vi" ? "Đại lý" : "Agency" 
+    },
+    { 
+      id: "other", 
+      label: lang === "vi" ? "Khác" : "Other" 
+    },
   ];
+
+  const handleContinue = () => {
+    if (!role) return;
+
+    // Logic điều hướng: khách -> visitor, đại lý -> agency, khác -> other
+    router.push(`/register/${role}?lang=${lang}`);
+  };
 
   return (
     <div className="glass-container w-full max-w-[500px] flex flex-col items-center animate-in fade-in zoom-in duration-1000 px-10">
@@ -36,6 +53,7 @@ export default function HomeSelectionPage() {
       </div>
 
       <div className="w-full flex flex-col items-center gap-8">
+        {/* CHỌN NGÔN NGỮ */}
         <div className="w-full max-w-[320px] relative">
           <span className="block text-center text-[10px] text-lavender tracking-[0.3em] uppercase mb-3 font-bold opacity-80">
             Ngôn ngữ / Language
@@ -56,6 +74,7 @@ export default function HomeSelectionPage() {
           )}
         </div>
 
+        {/* CHỌN VAI TRÒ */}
         <div className="w-full max-w-[320px] relative">
           <span className="block text-center text-[10px] text-lavender tracking-[0.3em] uppercase mb-3 font-bold opacity-80">
             Bạn là... / I am...
@@ -79,13 +98,20 @@ export default function HomeSelectionPage() {
           )}
         </div>
 
+        {/* NÚT ĐIỀU HƯỚNG */}
         <div className="w-full max-w-[320px] flex flex-col gap-5 mt-10">
           <button
-            onClick={() => role && router.push(`/register/${role}?lang=${lang}`)}
-            className="w-full py-5 bg-sky text-white font-black text-[16px] tracking-[0.3em] uppercase rounded-full hover:bg-white hover:text-sky hover:scale-[1.02] active:scale-95 transition-all duration-500 shadow-[0_15px_35px_rgba(93,169,221,0.3)]"
+            onClick={handleContinue}
+            disabled={!role}
+            className={`w-full py-5 font-black text-[16px] tracking-[0.3em] uppercase rounded-full transition-all duration-500 shadow-[0_15px_35px_rgba(93,169,221,0.3)] ${
+              role 
+                ? "bg-sky text-white hover:bg-white hover:text-sky hover:scale-[1.02] active:scale-95" 
+                : "bg-gray-500/20 text-white/30 cursor-not-allowed"
+            }`}
           >
             {lang === "vi" ? "TIẾP TỤC" : "CONTINUE"}
           </button>
+          
           <button
             onClick={() => router.push(`/check-status?lang=${lang}`)}
             className="w-full py-2 bg-transparent text-lavender hover:text-sunset font-black text-[11px] tracking-[0.2em] uppercase transition-all"
