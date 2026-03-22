@@ -1,0 +1,87 @@
+.adminContainer {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8fafc;
+  padding: 0.75rem;
+  overflow: hidden;
+}
+
+.topHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 0.6rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 0.5rem;
+}
+
+.calendarWrapper {
+  flex: 1;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  overflow: auto;
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: 55px repeat(7, minmax(0, 1fr));
+  width: 100%;
+}
+
+.timeHeaderSticky, .dayHeaderSticky {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: white;
+  padding: 0.4rem;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: center;
+}
+
+.today p:last-child {
+  background: #2563eb;
+  color: white;
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  border-radius: 50%;
+  margin: 1px auto 0;
+}
+
+.timeLabel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #64748b;
+  border-right: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f1f5f9;
+  background: #fcfcfd;
+}
+
+.cell {
+  border-bottom: 1px solid #f1f5f9;
+  border-right: 1px solid #f1f5f9;
+  min-height: 105px; /* Chiều cao tối ưu để thấy slot 15:00 */
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.eventCard {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 4px 6px;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.agency { border-left: 3px solid #f59e0b; background: #fffbeb; }
+.visitor { border-left: 3px solid #3b82f6; background: #f0f7ff; }

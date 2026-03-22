@@ -10,11 +10,18 @@ function VisitorForm() {
 
   const timeSlots = ["09:00", "10:30", "13:30", "15:00"];
 
-  // State
   const [selTime, setSelTime] = useState("");
   const [showTime, setShowTime] = useState(false);
+  const [loading, setLoading] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    fullName: '',
+    cccd: '',
+    phoneNumber: '',
+    guests: 0,
+    date: new Date().toISOString().split('T')[0]
+  });
 
-  // Dictionary chuyển ngữ
   const dict = {
     vi: {
       back: "← QUAY LẠI",
@@ -26,7 +33,8 @@ function VisitorForm() {
       date: "NGÀY",
       time: "KHUNG GIỜ",
       submit: "XÁC NHẬN ĐĂNG KÝ",
-      loading: "Đang tải..."
+      success: "Đăng ký thành công!",
+      error: "Có lỗi xảy ra, vui lòng thử lại!"
     },
     en: {
       back: "← BACK",
@@ -38,13 +46,12 @@ function VisitorForm() {
       date: "DATE",
       time: "TIME SLOT",
       submit: "CONFIRM REGISTRATION",
-      loading: "Loading..."
+      success: "Registration successful!",
+      error: "Error occurred, please try again!"
     }
   };
 
   const t = lang === 'en' ? dict.en : dict.vi;
-
-  // Logic Ngày & Giờ
   const today = new Date().toISOString().split('T')[0];
   const maxDate = new Date();
   maxDate.setDate(maxDate.getDate() + 2);
@@ -59,6 +66,41 @@ function VisitorForm() {
     });
     setSelTime(nextSlot || timeSlots[0]);
   }, []);
+
+  const handleSubmit = async () => {
+    if (!formData.fullName || !formData.phoneNumber) {
+      alert("Vui lòng nhập đầy đủ Họ tên và Số điện thoại!");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:3001/registrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          guests: Number(formData.guests),
+          timeSlot: selTime,
+          type: 'VISITOR'
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert(t.success);
+        router.push('/'); 
+      } else {
+        // Hiển thị lỗi chi tiết từ Backend (ví dụ: Hết slot 40 người)
+        alert(result.message || t.error);
+      }
+    } catch (error) {
+      alert("Không thể kết nối tới Server Backend!");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className={styles.glassContainer}>
@@ -75,26 +117,31 @@ function VisitorForm() {
         <div className={styles.formGrid}>
           <div className="col-span-2">
             <label className={styles.label}>{t.name}</label>
-            <input type="text" className={styles.regInput} placeholder="..." />
+            <input type="text" className={styles.regInput} placeholder="..." 
+              onChange={(e) => setFormData({...formData, fullName: e.target.value})} />
           </div>
           <div>
             <label className={styles.label}>{t.cccd}</label>
-            <input type="text" className={styles.regInput} placeholder="..." />
+            <input type="text" className={styles.regInput} placeholder="..." 
+              onChange={(e) => setFormData({...formData, cccd: e.target.value})} />
           </div>
           <div>
             <label className={styles.label}>{t.phone}</label>
-            <input type="tel" className={styles.regInput} placeholder="..." />
+            <input type="tel" className={styles.regInput} placeholder="..." 
+              onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})} />
           </div>
         </div>
 
         <div className={styles.subSelectionArea}>
           <div>
             <label className={styles.label}>{t.plus}</label>
-            <input type="number" defaultValue={0} min={0} max={10} className={styles.regInput} />
+            <input type="number" defaultValue={0} min={0} max={10} className={styles.regInput} 
+              onChange={(e) => setFormData({...formData, guests: parseInt(e.target.value)})} />
           </div>
           <div>
             <label className={styles.label}>{t.date}</label>
-            <input type="date" min={today} max={maxDateStr} defaultValue={today} className={styles.regInput} />
+            <input type="date" min={today} max={maxDateStr} defaultValue={today} className={styles.regInput} 
+              onChange={(e) => setFormData({...formData, date: e.target.value})} />
           </div>
           <div className="relative">
             <label className={styles.label}>{t.time}</label>
@@ -115,7 +162,9 @@ function VisitorForm() {
           </div>
         </div>
 
-        <button type="button" className={styles.btnSubmit}>{t.submit}</button>
+        <button type="button" className={styles.btnSubmit} onClick={handleSubmit} disabled={loading}>
+          {loading ? "..." : t.submit}
+        </button>
       </form>
     </div>
   );
