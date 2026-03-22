@@ -3,71 +3,89 @@ import React, { useEffect, useState, useMemo } from 'react';
 import styles from './calendar.module.css';
 import { 
   ChevronLeft, ChevronRight, FileSpreadsheet, 
-  User, Phone, Calendar as CalendarIcon, X, ShieldCheck, Trash2
+  User, Phone, Calendar as CalendarIcon, X, ShieldCheck, Trash2, Download
 } from 'lucide-react';
+import { createClient } from '@supabase/supabase-js';
+import * as XLSX from 'xlsx'; // Import thư viện Excel
+
+// Khởi tạo Supabase an toàn (Tránh lỗi "is required")
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabase = (supabaseUrl && supabaseAnonKey) ? createClient(supabaseUrl, supabaseAnonKey) : null;
 
 export default function AdminCalendar() {
   const [events, setEvents] = useState<any[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<any>(null); 
   const [startDate, setStartDate] = useState(new Date());
 
-  // Đảm bảo cổng này khớp với cổng JSON Server của bạn
-  const API_URL = "http://localhost:3001/registrations";
-
+  // 1. Lấy dữ liệu từ Supabase
   const fetchEvents = async () => {
+    if (!supabase) return;
     try {
-      const res = await fetch(API_URL);
-      if (res.ok) {
-        const data = await res.json();
-        // Lọc bỏ khách đã xóa
-        setEvents(data.filter((e: any) => e.status !== 'DELETED'));
-      }
-    } catch (error) {
-      console.error("Lỗi kết nối API:", error);
+      const { data, error } = await supabase
+        .from('registrations')
+        .select('*')
+        .order('date', { ascending: true });
+
+      if (error) throw error;
+      
+      // Lọc bỏ khách đã xóa
+      setEvents(data.filter((e: any) => e.status !== 'DELETED'));
+    } catch (error: any) {
+      console.error("Lỗi Supabase:", error.message);
     }
   };
 
-  // HÀM XÓA & LƯU LỊCH SỬ - FIX LỖI ID KHÔNG KHỚP
+  // 2. Xóa & Lưu lịch sử trực tiếp lên Cloud (Dứt điểm lỗi 404)
   const handleSoftDelete = async (id: any) => {
-    if (!id) return alert("Không tìm thấy ID khách hàng.");
+    if (!id || !supabase) return alert("Không tìm thấy kết nối hoặc ID khách hàng.");
     
-    if (!window.confirm("Khánh muốn xóa và lưu lịch sử khách này chứ?")) return;
+    if (!window.confirm("Khánh muốn xóa và lưu lịch sử khách này lên Cloud chứ?")) return;
 
     const now = new Date().toLocaleString('vi-VN');
-    const updateData = { 
-      status: "DELETED", 
-      deletedAt: now,
-      deletedBy: "Admin Khánh" 
-    };
 
     try {
-      // THỬ LẦN 1: Gửi ID nguyên bản
-      let res = await fetch(`${API_URL}/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updateData)
-      });
+      const { error } = await supabase
+        .from('registrations')
+        .update({ 
+          status: "DELETED", 
+          deletedAt: now,
+          deletedBy: "Admin Khánh" 
+        })
+        .eq('id', id);
 
-      // THỬ LẦN 2: Nếu lỗi 404, thử ép kiểu ID (từ string sang number hoặc ngược lại)
-      if (res.status === 404) {
-        const fallbackId = typeof id === 'string' ? parseInt(id) : String(id);
-        res = await fetch(`${API_URL}/${fallbackId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updateData)
-        });
-      }
-
-      if (res.ok) {
-        setEvents(prev => prev.filter(e => e.id !== id && e.id !== parseInt(id)));
+      if (!error) {
+        setEvents(prev => prev.filter(e => e.id !== id));
         setSelectedEvent(null);
         alert(`Đã xóa & lưu vết thành công lúc: ${now}`);
       } else {
-        alert(`Lỗi ${res.status}: Không tìm thấy ID ${id} trong file db.json.`);
+        alert(`Lỗi Supabase: ${error.message}`);
       }
     } catch (error) {
-      alert("Lỗi kết nối Server. Khánh kiểm tra terminal đã chạy JSON Server chưa nhé.");
+      alert("Lỗi kết nối Cloud. Khánh kiểm tra lại file .env.local nhé.");
     }
+  };
+
+  // 3. Hàm Xuất Excel cho báo cáo CRM
+  const exportToExcel = () => {
+    if (events.length === 0) return alert("Không có dữ liệu để xuất!");
+    
+    // Chuẩn bị dữ liệu sạch để xuất
+    const excelData = events.map(ev => ({
+      "Ngày": ev.date,
+      "Giờ": ev.timeSlot,
+      "Loại": ev.type,
+      "Tên Đơn vị/Khách": ev.type === 'AGENCY' ? ev.agencyName : ev.fullName,
+      "Người đại diện": ev.fullName,
+      "Số điện thoại": ev.phoneNumber,
+      "Số lượng đi cùng": ev.guests || 0,
+      "CCCD/Mã": ev.cccd || ''
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Lich_Tham_Quan");
+    XLSX.writeFile(workbook, `Bao_Cao_One_Era_${new Date().toLocaleDateString('vi-VN')}.xlsx`);
   };
 
   useEffect(() => { fetchEvents(); }, []);
@@ -91,14 +109,25 @@ export default function AdminCalendar() {
             <p className="text-[9px] text-gray-400 font-black uppercase">Quản trị CRM - Khánh</p>
           </div>
         </div>
-        <div className="flex items-center bg-gray-50 rounded-lg border border-gray-200 p-0.5">
-          <button onClick={() => { const d = new Date(startDate); d.setDate(d.getDate() - 7); setStartDate(d); }} className="p-1.5 hover:bg-white rounded-md"><ChevronLeft size={16}/></button>
-          <span className="text-[12px] font-bold px-4 min-w-[160px] text-center">{new Date(days[0]).toLocaleDateString('vi-VN')} - {new Date(days[6]).toLocaleDateString('vi-VN')}</span>
-          <button onClick={() => { const d = new Date(startDate); d.setDate(d.getDate() + 7); setStartDate(d); }} className="p-1.5 hover:bg-white rounded-md"><ChevronRight size={16}/></button>
+
+        {/* Cụm điều khiển & Nút Excel */}
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={exportToExcel}
+            className="flex items-center gap-2 px-3 py-1.5 bg-green-600 text-white text-[10px] font-bold rounded-lg hover:bg-green-700 transition-colors uppercase"
+          >
+            <Download size={14} /> Xuất Excel
+          </button>
+
+          <div className="flex items-center bg-gray-50 rounded-lg border border-gray-200 p-0.5">
+            <button onClick={() => { const d = new Date(startDate); d.setDate(d.getDate() - 7); setStartDate(d); }} className="p-1.5 hover:bg-white rounded-md"><ChevronLeft size={16}/></button>
+            <span className="text-[12px] font-bold px-4 min-w-[160px] text-center">{new Date(days[0]).toLocaleDateString('vi-VN')} - {new Date(days[6]).toLocaleDateString('vi-VN')}</span>
+            <button onClick={() => { const d = new Date(startDate); d.setDate(d.getDate() + 7); setStartDate(d); }} className="p-1.5 hover:bg-white rounded-md"><ChevronRight size={16}/></button>
+          </div>
         </div>
       </div>
 
-      {/* LỊCH TRÌNH */}
+      {/* GIỮ NGUYÊN PHẦN LỊCH TRÌNH VÀ MODAL CỦA KHÁNH ... */}
       <div className={styles.calendarWrapper}>
         <div className={styles.calendarGrid}>
           <div className={styles.timeHeaderSticky}>GIỜ</div>
