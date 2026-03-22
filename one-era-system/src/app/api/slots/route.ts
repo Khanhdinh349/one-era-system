@@ -1,7 +1,7 @@
 // Logic chia nhỏ thời gian
 export async function GET(request: Request) {
-  const immersionSlots = []; // Mỗi 25 phút
-  const modelHouseSlots = []; // Mỗi 1 tiếng 30 phút
+  const immersionSlots = []; 
+  const modelHouseSlots = [];
 
   // Ví dụ tạo slot cho Immersion (9h - 17h)
   let start = new Date();
