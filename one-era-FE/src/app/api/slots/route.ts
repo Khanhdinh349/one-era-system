@@ -6,8 +6,7 @@ import { NextResponse } from 'next/server';
 export async function GET() {
   let db;
   try {
-    // Đường dẫn trỏ thẳng sang folder BE
-    const dbPath = path.resolve(process.cwd(), '..', 'one-era-api', 'one-era.db');
+    const dbPath = path.resolve(process.cwd(), '..', 'one-era-BE', 'one-era.db');
     
     db = await open({
       filename: dbPath,
