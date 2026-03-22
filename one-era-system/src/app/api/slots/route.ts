@@ -1,16 +1,13 @@
-// Logic chia nhỏ thời gian
-export async function GET(request: Request) {
-  const immersionSlots = []; 
-  const modelHouseSlots = [];
+import { NextResponse } from 'next/server';
+import { getDatabase } from '@/lib/db';
 
-  // Ví dụ tạo slot cho Immersion (9h - 17h)
-  let start = new Date();
-  start.setHours(9, 0, 0);
-  while(start.getHours() < 17) {
-    immersionSlots.push(start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}));
-    start.setMinutes(start.getMinutes() + 25);
+export async function GET() {
+  try {
+    const db = await getDatabase();
+    // Lấy khách chưa bị xóa và sắp xếp theo ngày
+    const rows = await db.all('SELECT * FROM registrations WHERE status IS NOT "DELETED" ORDER BY visit_date ASC');
+    return NextResponse.json(rows);
+  } catch (error) {
+    return NextResponse.json({ error: "Lỗi DB" }, { status: 500 });
   }
-  
-  // Sau đó so khớp với Database, nếu slot nào đã có 25 người đặt thì đánh dấu "full"
-  return Response.json({ immersionSlots, modelHouseSlots });
 }

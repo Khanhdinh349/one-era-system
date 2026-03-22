@@ -1,10 +1,9 @@
 .adminContainer {
-  height: 100vh;
+  padding: 15px;
+  background: #f8fafc;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #f8fafc;
-  padding: 0.75rem;
-  overflow: hidden;
 }
 
 .topHeader {
@@ -12,76 +11,100 @@
   justify-content: space-between;
   align-items: center;
   background: white;
-  padding: 0.6rem 1rem;
-  border-radius: 0.75rem;
-  border: 1px solid #e2e8f0;
-  margin-bottom: 0.5rem;
+  padding: 0.7rem 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+  margin-bottom: 12px;
 }
 
 .calendarWrapper {
-  flex: 1;
   background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 1rem;
-  overflow: auto;
+  border-radius: 1.5rem;
+  padding: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+  border: 1px solid #f1f5f9;
+  flex: 1;
+  overflow: hidden; /* Khóa không cho tràn trang chính */
 }
 
 .calendarGrid {
   display: grid;
-  grid-template-columns: 55px repeat(7, minmax(0, 1fr));
-  width: 100%;
+  /* Thu nhỏ cột Giờ và cho phép cột Ngày co giãn linh hoạt hơn */
+  grid-template-columns: 60px repeat(7, minmax(100px, 1fr));
+  gap: 1px;
+  background: #e2e8f0;
+  border: 1px solid #e2e8f0;
+  height: 100%;
 }
 
-.timeHeaderSticky, .dayHeaderSticky {
-  position: sticky;
-  top: 0;
-  z-index: 20;
+.dayHeader {
   background: white;
-  padding: 0.4rem;
-  border-bottom: 1px solid #f1f5f9;
+  padding: 10px 5px;
   text-align: center;
 }
 
-.today p:last-child {
-  background: #2563eb;
-  color: white;
-  width: 28px;
-  height: 28px;
-  line-height: 28px;
-  border-radius: 50%;
-  margin: 1px auto 0;
+.today .dayNum {
+  color: #2563eb;
+  font-weight: 900;
 }
 
 .timeLabel {
+  background: #f8fafc;
+  height: 100px; /* GIẢM CHIỀU CAO để thấy mốc 15:00 */
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 11px;
   font-weight: 800;
   color: #64748b;
-  border-right: 1px solid #f1f5f9;
-  border-bottom: 1px solid #f1f5f9;
-  background: #fcfcfd;
 }
 
 .cell {
-  border-bottom: 1px solid #f1f5f9;
-  border-right: 1px solid #f1f5f9;
-  min-height: 105px; /* Chiều cao tối ưu để thấy slot 15:00 */
-  padding: 4px;
+  background: white;
+  height: 100px; /* Khớp với cột giờ */
+  padding: 5px;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
+  overflow-y: auto; /* Scroll nội bộ nếu quá nhiều khách */
 }
 
+/* Thẻ Card thu gọn để không chiếm chỗ */
 .eventCard {
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 4px;
-  padding: 4px 6px;
+  flex-shrink: 0;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border-left: 3px solid;
   cursor: pointer;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
 }
 
-.agency { border-left: 3px solid #f59e0b; background: #fffbeb; }
-.visitor { border-left: 3px solid #3b82f6; background: #f0f7ff; }
+.agency { background: #fff7ed; border-color: #f79552; }
+.visitor { background: #eff6ff; border-color: #5da9dd; }
+
+.eventTitle {
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.eventSub {
+  font-size: 8px;
+  color: #64748b;
+}
+
+.btnExcel {
+  background: #10b981;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+}
