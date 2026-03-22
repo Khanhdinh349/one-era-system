@@ -39,7 +39,7 @@ export default function FullCalendar() {
           <div className="p-2 bg-blue-600 text-white rounded-lg"><CalendarIcon size={20} /></div>
           <div>
             <h1 className="text-md font-black text-slate-800 leading-none">ONE ERA SYSTEM</h1>
-            <p className="text-[9px] font-bold text-blue-500 uppercase tracking-widest">CRM Admin: Khánh</p>
+            <p className="text-[9px] font-bold text-blue-500 uppercase tracking-widest">ADMIN: ONE-NAME</p>
           </div>
         </div>
 
